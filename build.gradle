@@ -7,7 +7,7 @@ plugins {
 }
 
 group 'org.digitalsmile'
-version '0.2.2'
+version '0.2.3'
 
 sourceCompatibility = 17 // java 8
 targetCompatibility = 17
@@ -21,12 +21,26 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.9.0'
     testImplementation 'org.openjdk.jol:jol-core:0.16'
 }
-
+/**
 publishing {
     publications {
         maven(MavenPublication) {
             from components.java
         }
+    }
+}*/
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId = "${group}"
+            artifactId = "Hexagon"
+            version = "${version}-SNAPSHOT"
+            from components.java
+        }
+    }
+    repositories {
+        maven { url = uri("${rootProject.projectDir}/.repo/releases") }
     }
 }
 

@@ -1,159 +1,114 @@
 package org.digitalsmile.hexgrid.hexagon;
 
 import java.util.Arrays;
-import java.util.List;
+import java.util.Objects;
 
-/**
- * Main record class that represents hexagon in cube coordinates. o learn more about cube coordinates, visit <a href="https://www.redblobgames.com/grids/hexagons/#coordinates-cube">@redblobgames</a>
- * You can perform add, subtract, scale (multiply), rotation operations on it.
- * Also, there are operations for finding direction, getting neighbour and calculating distance.
- * NOTE: since it is a record class, equals of existing and new instance with same q, r and s coordinates will <b>always return true</b>.
- *
- * @param q q coordinate of hexagon
- * @param r q coordinate of hexagon
- * @param s q coordinate of hexagon
- */
-public record Hexagon(int q, int r, int s) {
+public class Hexagon {
 
-    public Hexagon {
+    // --- Extension Hook ---
+
+    /**
+     * The factory used by all geometric operations to create new Hexagon instances.
+     * Game extensions (like GameHex) must override this static field in a static
+     * block to ensure all math results return the extended type.
+     */
+    protected static IHexagonFactory factory = Hexagon::new;
+
+    // --- Internal State ---
+
+    private final int q, r, s;
+    private final BaseHexagon base;
+
+    // --- Constructor (Used by Library Users) ---
+
+    public Hexagon(int q, int r, int s) {
         if (q + r + s != 0) {
             throw new IllegalArgumentException("q + r + s must be 0");
         }
+        this.q = q;
+        this.r = r;
+        this.s = s;
+        // Initialize the base worker with the coordinates and the current factory
+        this.base = new BaseHexagon(q, r, s, factory);
     }
 
-    /**
-     * Sums current hexagon with provided.
-     *
-     * @param hexagon provided hexagon to add
-     * @return the sum of two hexagons
-     */
+    // --- Public Accessors ---
+
+    public int q() { return q; }
+    public int r() { return r; }
+    public int s() { return s; }
+
+    // --- Geometric Operations (Delegation) ---
+
     public Hexagon add(Hexagon hexagon) {
-        return new Hexagon(q + hexagon.q(), r + hexagon.r(), s + hexagon.s());
+        return base.add(hexagon);
     }
 
-    /**
-     * Subtracts current hexagon from hexagon provided.
-     *
-     * @param hexagon provided hexagon to subtract
-     * @return the subtraction of two hexagons
-     */
     public Hexagon subtract(Hexagon hexagon) {
-        return new Hexagon(q - hexagon.q(), r - hexagon.r(), s - hexagon.s());
+        return base.subtract(hexagon);
     }
 
-    /**
-     * Scales current hexagon by the amount provided.
-     *
-     * @param unitScale amount to scale
-     * @return scaled hexagon
-     */
     public Hexagon scale(int unitScale) {
-        return new Hexagon(q * unitScale, r * unitScale, s * unitScale);
+        return base.scale(unitScale);
     }
 
-    /**
-     * Rotates hexagon to the left.
-     *
-     * @return left rotated hexagon
-     */
     public Hexagon rotateLeft() {
-        return new Hexagon(-s, -q, -r);
+        return base.rotateLeft();
     }
 
-    /**
-     * Rotates hexagon to the right.
-     *
-     * @return right rotated hexagon
-     */
     public Hexagon rotateRight() {
-        return new Hexagon(-r, -s, -q);
+        return base.rotateRight();
     }
 
-    /**
-     * Reflect the hexagon by Q-axis.
-     *
-     * @return reflected hexagon
-     */
     public Hexagon reflectQ() {
-        return new Hexagon(q, s, r);
+        return base.reflectQ();
     }
 
-    /**
-     * Reflect the hexagon by R-axis.
-     *
-     * @return reflected hexagon
-     */
     public Hexagon reflectR() {
-        return new Hexagon(s, r, q);
+        return base.reflectR();
     }
 
-    /**
-     * Reflect the hexagon by S-axis.
-     *
-     * @return reflected hexagon
-     */
     public Hexagon reflectS() {
-        return new Hexagon(r, q, s);
+        return base.reflectS();
     }
 
-    /**
-     * Negates the hexagon.
-     *
-     * @return negated hexagon
-     */
     public Hexagon negate() {
-        return new Hexagon(-q, -r, -s);
+        return base.negate();
     }
 
-    /**
-     * Gets hexagon direction relative to current hexagon.
-     *
-     * @param hexagon hexagon to be checked
-     * @return hexagon direction
-     */
     public HexagonDirection direction(Hexagon hexagon) {
         return Arrays.stream(HexagonDirection.values())
                 .filter(direction -> add(direction.getDeltaHexagon()).equals(hexagon))
-                .findFirst().orElseThrow();
+                .findFirst().orElseThrow(() -> new IllegalArgumentException("Hexagon is not a direct neighbor."));
     }
 
-    /**
-     * Gets neighbour hexagon by direction provided.
-     *
-     * @param direction hexagon direction to check
-     * @return hexagon at provided direction
-     */
     public Hexagon neighbor(HexagonDirection direction) {
-        return add(direction.getDeltaHexagon());
+        return base.neighbor(direction);
     }
 
-    private static final List<Hexagon> DIAGONALS = List.of(
-            new Hexagon(2, -1, -1), new Hexagon(1, -2, 1), new Hexagon(-1, -1, 2),
-            new Hexagon(-2, 1, 1), new Hexagon(-1, 2, -1), new Hexagon(1, 1, -2)
-    );
-
-    /**
-     * Gets diagonal neighbour hexagon by direction provided.
-     *
-     * @param direction hexagon direction to check
-     * @return hexagon at provided direction
-     */
     public Hexagon diagonalNeighbor(int direction) {
-        return add(DIAGONALS.get(direction));
+        return base.diagonalNeighbor(direction);
     }
 
-    /**
-     * Calculates distance from current hexagon to hexagon provided.
-     *
-     * @param hexagon provided hexagon to calculate distance
-     * @return number of hexagons between current and provided hexagons (distance)
-     */
     public int distance(Hexagon hexagon) {
-        return subtract(hexagon).length();
+        return base.distance(hexagon);
     }
 
-    private int length() {
+    public int length() {
         return (Math.abs(q) + Math.abs(r) + Math.abs(s)) / 2;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || !(o instanceof Hexagon hexagon)) return false;
+
+        return q == hexagon.q() && r == hexagon.r() && s == hexagon.s();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(q, r, s);
     }
 
     @Override
