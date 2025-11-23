@@ -1,6 +1,6 @@
 package org.digitalsmile.hexgrid.hexagon;
 
-interface IHexagon {
+public interface IHexagon {
     Hexagon add(Hexagon hexagon);
     Hexagon subtract(Hexagon hexagon);
     Hexagon scale(int unitScale);

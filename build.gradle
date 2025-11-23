@@ -34,7 +34,7 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             groupId = "${group}"
-            artifactId = "Hexagon"
+            artifactId ="${rootProject.name}"
             version = "${version}-SNAPSHOT"
             from components.java
         }

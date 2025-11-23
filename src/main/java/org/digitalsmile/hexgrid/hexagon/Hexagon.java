@@ -14,6 +14,10 @@ public class Hexagon {
      */
     protected static IHexagonFactory factory = Hexagon::new;
 
+    protected static void setFactory(IHexagonFactory factoryLambda) {
+        Hexagon.factory = factoryLambda;
+    }
+
     // --- Internal State ---
 
     private final int q, r, s;
