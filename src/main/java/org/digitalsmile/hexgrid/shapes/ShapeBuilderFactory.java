@@ -5,6 +5,7 @@ import org.digitalsmile.hexgrid.shapes.hexagonal.HexagonalShapeBuilder;
 import org.digitalsmile.hexgrid.shapes.rectangle.RectangleShape;
 import org.digitalsmile.hexgrid.shapes.rectangle.RectangleShapeBuilder;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -12,10 +13,10 @@ import java.util.Map;
  */
 public class ShapeBuilderFactory {
 
-    private static Map<Class<? extends Shape>, ShapeBuilder<? extends Shape>> map = Map.of(
+    private static Map<Class<? extends Shape>, ShapeBuilder<? extends Shape>> map = new HashMap<>(Map.of(
             RectangleShape.class, new RectangleShapeBuilder(),
             HexagonalShape.class, new HexagonalShapeBuilder()
-    );
+    ));
 
     /**
      * Register new shape
