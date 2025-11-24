@@ -12,10 +12,20 @@ import java.util.Map;
  */
 public class ShapeBuilderFactory {
 
-    private static final Map<Class<? extends Shape>, ShapeBuilder<? extends Shape>> map = Map.of(
+    private static Map<Class<? extends Shape>, ShapeBuilder<? extends Shape>> map = Map.of(
             RectangleShape.class, new RectangleShapeBuilder(),
             HexagonalShape.class, new HexagonalShapeBuilder()
     );
+
+    /**
+     * Register new shape
+     *
+     * @param shape
+     * @param shapeBuilder
+     */
+    public static void registerNewShape(Class<? extends Shape> shape, ShapeBuilder<? extends Shape> shapeBuilder) {
+        map.put(shape, shapeBuilder);
+    }
 
     private ShapeBuilderFactory() {
     }
